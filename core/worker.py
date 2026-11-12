@@ -1,5 +1,7 @@
 import time
 import random
+import threading
+import requests
 import cv2
 from core.config import (
     W_SPACE_INTERVAL,
@@ -22,6 +24,32 @@ from core.state import (
     add_log,
     broadcast_state
 )
+
+# ── Discord webhook ───────────────────────────────────────────────
+DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1570236308834484355/_DwCttXn7u2fvxSA9jm7hi1woQsBIIX4C-fn1vE-Haxy3hcL7TDao-oYPNAZ5SianBBy"
+
+def send_discord_notification(total_drops: int):
+    if not DISCORD_WEBHOOK_URL or DISCORD_WEBHOOK_URL == "YOUR_WEBHOOK_URL_HERE":
+        return
+    payload = {
+        "username": "Pirate Farm 🏴‍☠️",
+        "embeds": [{
+            "title": "🎉 PIRATE SHOP ACCESS FOUND!",
+            "description": (
+                f"Your farm just hit a **Pirate Shop Access Token**!\n"
+                f"**Total drops this session: {total_drops}**\n\n"
+                "Go activate it before it expires! ⏰"
+            ),
+            "color": 0xF4C430,
+            "footer": {"text": "Nyr0 Pirate Coin Automation"}
+        }]
+    }
+    try:
+        requests.post(DISCORD_WEBHOOK_URL, json=payload, timeout=5)
+    except Exception:
+        pass
+# ─────────────────────────────────────────────────────────────────
+
 
 def w_space_worker():
     while not state.stop_event.is_set():
@@ -65,6 +93,12 @@ def worker_loop():
                         state.last_access_time = now
                         add_log(f"PIRATE SHOP ACCESS DETECTED! (Total Drops: {state.access_found})", "success")
                         broadcast_state()
+                        # ── fire Discord notification on its own thread so it never blocks the loop ──
+                        threading.Thread(
+                            target=send_discord_notification,
+                            args=(state.access_found,),
+                            daemon=True
+                        ).start()
                         break
 
             roi_back = (int(fh * 0.60), int(fh * 0.95), int(fw * 0.10), int(fw * 0.50))
@@ -195,4 +229,3 @@ def worker_loop():
     state.status = "IDLE"
     broadcast_state()
     add_log("Macro stopped.", "info")
-
