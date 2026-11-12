@@ -26,7 +26,7 @@ from core.state import (
 )
 
 # ── Discord webhook ───────────────────────────────────────────────
-DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1570236308834484355/_DwCttXn7u2fvxSA9jm7hi1woQsBIIX4C-fn1vE-Haxy3hcL7TDao-oYPNAZ5SianBBy"
+DISCORD_WEBHOOK_URL = "YOUR_WEBHOOK_URL_HERE"
 
 def send_discord_notification(total_drops: int):
     if not DISCORD_WEBHOOK_URL or DISCORD_WEBHOOK_URL == "YOUR_WEBHOOK_URL_HERE":
