@@ -8,4 +8,4 @@ Pillow
 eel
 pywin32
 pyinstaller
-
+requests
